@@ -1,1 +1,54 @@
+#Week 01 — Linux Fundamentals: Assessment Pack (Student)
 
+
+##Part A — Multiple choice (10 × 1 = 10 pts)
+
+1. /proc
+2. 640
+3.ls dir list names only
+4.640
+5. SIGKILL
+6. Makes it starts at boot
+7. it refreshes the package index
+8. /etc/passwd
+9. setgit
+10. it appends stdout to log.txt
+
+##Part B — Short answer (10 × 1.5 = 15 pts)
+1. awk '{print $1}' access.log | sort -u | wc -l
+2. uniq only collapses adjacent duplicates. Sorting first makes identical lines adjacent so the counts are correct.
+3. find /var -type f -size +100M -mtime -1
+6. on-failure restarts only after an unclean exit (non-zero code, killed by signal, timeout). always restarts even after a clean exit with code 0.
+7. It mounts the whole filesystem read-only for the service, except /dev, /proc, /sys and any paths listed in ReadWritePaths=.
+9. remove deletes the package but keeps its config files. purge deletes the config files too.
+10. On a directory, r lists names, w creates, deletes and renames entries, and x enters the directory and accesses entries by name.
+
+
+##Part C — Predict the output (6 × 1 = 6 pts)
+
+1. 644 a and 755 b (files start at 666, directories at 777, and umask 022 is subtracted).
+2. 3
+4. -rwxr-x---
+5. g is -rwsr-xr-x and h is -rwSr--r--. The capital S means setuid is set but execute is not, which is usually a mistake.
+6. It counts lines where column 9 (the status code) is 500. c+0 forces a numeric result,
+
+##Part D — Troubleshooting (6 × 1 = 6 pts)
+
+1. 17/USER: The User= or Group= in the unit doesn't exist. Fix: sudo useradd --system --no-create-home --shell /usr/sbin/nologin examsvc, then daemon-reload and restart.
+2. 203/EXEC: systemd can't execute ExecStart, because the path is wrong, the file isn't executable, or the shebang points to something missing. Fix: use the correct absolute path, chmod +x the file, or fix the interpreter line.
+3. Errno 13 on port 443: Ports under 1024 are privileged. Fix 1: add AmbientCapabilities=CAP_NET_BIND_SERVICE to the unit. Fix 2: run the app on a high port (e.g. 8443) behind a reverse proxy like Nginx. (Alternative: a port-redirect firewall rule.)
+4. forgot sudo systemctl daemon-reload, so systemd was still using the old unit.
+5. Alice's file was created as rw-r--r-- (umask 022), so the group has no write access. Long-term fixes: set a team umask of 002 (e.g. via pam_umask//etc/login.defs), or set a default ACL: setfacl -d -m g:devs:rwX /srv/devs.
+6. Fix with sudo chmod 440 /etc/sudoers.d/ops (and chown root:root). Validate everything with sudo visudo -c.
+
+##Part E — Reasoning / viva (4 × 0.75 = 3 pts; answer in 3–4 sentences or orally)
+1. If a web service is compromised, the attacker inherits root. Running as an unprivileged user limits the damage to what that account can access (least privilege).
+2. So one can instantly roll back if an experiment breaks the system, without rebuilding the VM.
+Step by step:
+3. shell runs sudo, which checks /etc/sudoers and /etc/sudoers.d/ for a rule matching you and this command.
+    a. It authenticates you (password, unless NOPASSWD) and logs the attempt.
+    b. It runs systemctl as root.
+    c. systemctl asks systemd (PID 1) to restart hello-web.
+    d. systemd sends SIGTERM to the service's processes and escalates to SIGKILL after the stop timeout.
+    e. It starts ExecStart again with the configured User= and sandboxing options.
+    f. Output goes to the journal.
