@@ -1,4 +1,4 @@
-#Week 01 — Linux Fundamentals: Assessment Pack (Student)
+#Week 01 — Linux Fundamentals: Assessment Pack
 
 
 ##Part A — Multiple choice (10 × 1 = 10 pts)
@@ -18,8 +18,11 @@
 1. awk '{print $1}' access.log | sort -u | wc -l
 2. uniq only collapses adjacent duplicates. Sorting first makes identical lines adjacent so the counts are correct.
 3. find /var -type f -size +100M -mtime -1
+4. The redirection is performed by the user's shell before sudo runs. Use echo x | sudo tee /etc/myfile (or sudo sh -c 'echo x > /etc/myfile').
+5. No password login and no interactive shell: limits damage if the service is compromised; not meant for people.
 6. on-failure restarts only after an unclean exit (non-zero code, killed by signal, timeout). always restarts even after a clean exit with code 0.
 7. It mounts the whole filesystem read-only for the service, except /dev, /proc, /sys and any paths listed in ReadWritePaths=.
+8. PID 1 (systemd) or the nearest subreaper.
 9. remove deletes the package but keeps its config files. purge deletes the config files too.
 10. On a directory, r lists names, w creates, deletes and renames entries, and x enters the directory and accesses entries by name.
 
@@ -28,6 +31,7 @@
 
 1. 644 a and 755 b (files start at 666, directories at 777, and umask 022 is subtracted).
 2. 3
+3. First: all.txt has the /etc listing and the error (both captured), nothing on screen. Second (2>&1 > all.txt): the error prints to the screen (stderr was pointed at the terminal before stdout moved), all.txt has only the stdout listing. Redirections are processed left to right.
 4. -rwxr-x---
 5. g is -rwsr-xr-x and h is -rwSr--r--. The capital S means setuid is set but execute is not, which is usually a mistake.
 6. It counts lines where column 9 (the status code) is 500. c+0 forces a numeric result,
@@ -52,3 +56,5 @@ Step by step:
     d. systemd sends SIGTERM to the service's processes and escalates to SIGKILL after the stop timeout.
     e. It starts ExecStart again with the configured User= and sandboxing options.
     f. Output goes to the journal.
+4. systemctl asks systemd (PID 1) over D-Bus; systemd sends SIGTERM to the main process (after ExecStop), waits TimeoutStopSec, escalates to SIGKILL, then starts a new process per ExecStart as User=; output goes to the journal. Award for ordered, correct steps.
+
